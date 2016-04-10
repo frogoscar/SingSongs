@@ -20,21 +20,30 @@
         android:layout_centerVertical="true"
         android:orientation="vertical">
 
-        <LinearLayout
-            android:id="@+id/ll_radio"
+
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="horizontal">
+            android:layout_weight="1">
 
-        </LinearLayout>
+            <LinearLayout
+                android:id="@+id/ll_media"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"></LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_pacman"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"></LinearLayout>
+        </FrameLayout>
 
         <LinearLayout
             android:id="@+id/ll_lyric"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:orientation="horizontal">
-        </LinearLayout>
+            android:orientation="horizontal"></LinearLayout>
     </LinearLayout>
 </RelativeLayout>

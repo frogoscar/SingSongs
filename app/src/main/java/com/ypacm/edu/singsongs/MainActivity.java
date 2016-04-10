@@ -5,7 +5,7 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.media.MediaPlayer;
-import android.net.Uri;
+import android.media.audiofx.Visualizer;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -13,11 +13,13 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.ypacm.edu.singsongs.fragment.LyricFragment;
+import com.ypacm.edu.singsongs.fragment.MediaFragment;
 import com.ypacm.edu.singsongs.fragment.RadioFragment;
 
 import java.io.IOException;
@@ -26,13 +28,16 @@ import java.io.IOException;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private static final String TAG = "MainActivity";
     private MediaPlayer mMediaPlayer;
+    private Visualizer mVisualizer;
     public Context mContext;
+    static final int BLOCK_SIZE = 1 << 6;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mContext=this;
+        mContext = this;
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -48,26 +53,45 @@ public class MainActivity extends AppCompatActivity
 
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction beginTransaction = fragmentManager.beginTransaction();
+        final MediaFragment mediaFragment = new MediaFragment();
+        beginTransaction.add(R.id.ll_media, mediaFragment, "mediaFragment");
         RadioFragment radioFragment = new RadioFragment();
-        beginTransaction.add(R.id.ll_radio, radioFragment, "radioFragment");
-        LyricFragment lyricFragment =new LyricFragment();
-        beginTransaction.add(R.id.ll_lyric,lyricFragment,"lyricFragment");
+        beginTransaction.add(R.id.ll_pacman, radioFragment, "radioFragment");
+        LyricFragment lyricFragment = new LyricFragment();
+        beginTransaction.add(R.id.ll_lyric, lyricFragment, "lyricFragment");
         beginTransaction.commit();
 
 
+        mMediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.standard_tone);
+//        mMediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.libai2);
+        mMediaPlayer.setLooping(true);
+        final int maxCR = Visualizer.getMaxCaptureRate();
+        mVisualizer = new Visualizer(mMediaPlayer.getAudioSessionId());
+//        mVisualizer.setCaptureSize(BLOCK_SIZE);
+        mVisualizer.setDataCaptureListener(
+                new Visualizer.OnDataCaptureListener() {
+                    public void onWaveFormDataCapture(Visualizer visualizer,
+                                                      byte[] bytes, int samplingRate) {
+                    }
+
+                    public void onFftDataCapture(Visualizer visualizer,
+                                                 byte[] fft, int samplingRate) {
+                        Log.i(TAG,""+ mVisualizer.getCaptureSize());
+                        Log.i(TAG,""+ samplingRate);
+                        mediaFragment.MyDraw(fft,samplingRate);
+                    }
+                }, maxCR / 2, false, true);
+
+        mVisualizer.setEnabled(true);
         new Thread(new Runnable() {
             @Override
             public void run() {
                 //空的音频会放不起来
-                mMediaPlayer = MediaPlayer.create(MainActivity.this,R.raw.libai2);
 
-                if (mMediaPlayer != null)
-                {
+                if (mMediaPlayer != null) {
                     mMediaPlayer.start();
-                }
-                else
-                {
-                    Toast.makeText(MainActivity.this,"音乐加载不成功",Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "音乐加载不成功", Toast.LENGTH_LONG).show();
                 }
             }
         }).start();

@@ -27,8 +27,7 @@ import com.ypacm.edu.singsongs.fftpack.RealDoubleFFT;
  */
 public class RadioFragment extends Fragment {
 
-    private Handler handler;
-    private ImageView imageView;
+    private Handler handler = new Handler();
     private ImageView pacMan;
 
     static final int frequency = 8000;
@@ -40,42 +39,27 @@ public class RadioFragment extends Fragment {
 
     private boolean startFlag = true;
     private RealDoubleFFT fftTrans;
-    public Bitmap bitmap;
-    public Canvas canvas;
-    private Paint paint;
-    private Point point;
 
     private int width = 1080;
     private int height = 1920;
-    private int drawPoint[] = new int[200];
-    private int drawCount = 0;
-
-//    private AnimationRunnable runnable = new AnimationRunnable();
-//    private int pacmanCount = 0;
-//    private int pacmanId[] = {R.drawable.pacman_right3, R.drawable.pacman_right2, R.drawable.pacman_right1, R.drawable.pacman_right0,};
+    AnimationRunnable runnable = new AnimationRunnable();
+    private int pacmanCount = 0;
+    private int pacmanId[] = {R.drawable.pacman_right3, R.drawable.pacman_right2, R.drawable.pacman_right1, R.drawable.pacman_right0,};
 
     @Override
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View mView = inflater.inflate(R.layout.radio_fragment, container, false);
-        imageView = (ImageView) mView.findViewById(R.id.iv_radio);
+        View mView = inflater.inflate(R.layout.pacman_fragment, container, false);
 
+
+        pacMan = (ImageView) mView.findViewById(R.id.iv_pacman);
+        pacMan.setX(width / 8);
+        pacMan.setY(height / 4);
+        pacMan.setImageResource(R.drawable.pacman_right3);
+        handler.postDelayed(runnable, 200);
+        fftTrans = new RealDoubleFFT(BLOCK_SIZE);
         task = new RecordAudioTask();
         task.execute();
-        fftTrans = new RealDoubleFFT(BLOCK_SIZE);
-        bitmap = Bitmap.createBitmap(width, height / 2, Bitmap.Config.ARGB_8888);
-        canvas = new Canvas(bitmap);
-        paint = new Paint();
-        paint.setColor(Color.GREEN);
-        imageView.setImageBitmap(bitmap);
-
-
-//        pacMan = (ImageView) mView.findViewById(R.id.iv_pacman);
-//        pacMan.setX(300);
-//        pacMan.setY(height / 4);
-//        pacMan.setImageResource(R.drawable.pacman_right3);
-//        handler.postDelayed(runnable, 200);
-
         return mView;
     }
 
@@ -127,35 +111,23 @@ public class RadioFragment extends Fragment {
             int maxn = 0;
             for (int i = 0; i < values[0].length; i++) {
                 if (values[0][i] > maxn) {
-                maxn = i * 4;
+                    maxn = i;
+                }
             }
-            int x;
-            x = width / values[0].length * (i + 1);
-            int downy = (int) (height / 2 - (values[0][i] * 10));
-            //频率为 i*frequency/BLOCK_SIZE
-                int upy = height / 2;
-
-//                canvas.drawLine(x, downy, x, upy, paint);
-            }
-            drawPoint[drawCount] = (int) (height / 2 - (maxn ));
-            for (int i = 0; i < 200; i++) {
-//                canvas.drawPoint(width - i, drawPoint[(drawCount - i + width) % width], paint);
-                canvas.drawLine((200 - i) * width / 200, drawPoint[(drawCount - i + 200) % 200], (200 - i - 1) * width / 200, drawPoint[(drawCount - i + 200) % 200], paint);
-            }
-            drawCount = (drawCount + 1) % 200;
-            Log.d("Hz", Integer.toString(maxn));
-//            pacMan.setX(300);
-//            pacMan.setY((int) (height / 2 - (maxn * 0.5)));
-            imageView.invalidate();
+            Log.d("maxn", "" + maxn * 4);
+            int p = (height / 2 - (maxn * 2));
+            pacMan.setY(p);
+            Log.d("pacman", "" + p);
+            pacMan.invalidate();
         }
     }
 
-//    class AnimationRunnable implements Runnable {
-//        @Override
-//        public void run() {
-//            pacmanCount = (pacmanCount + 1) % 4;
-//            pacMan.setImageResource(pacmanId[pacmanCount]);
-//            handler.postDelayed(runnable, 200);
-//        }
-//    }
+    class AnimationRunnable implements Runnable {
+        @Override
+        public void run() {
+            pacMan.setImageResource(pacmanId[pacmanCount]);
+            pacmanCount = (pacmanCount + 1) % 4;
+            handler.postDelayed(runnable, 200);
+        }
+    }
 }
