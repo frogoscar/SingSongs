@@ -71,7 +71,7 @@ public class LyricView extends TextView implements Runnable {
         mCurrentPaint = new Paint();
         mCurrentPaint.setAntiAlias(true);
         mCurrentPaint.setColor(highlightColor);
-        mCurrentPaint.setTextSize(40);
+        mCurrentPaint.setTextSize(44);
         mCurrentPaint.setTypeface(Typeface.SANS_SERIF);
 
         mPaint.setTextAlign(Paint.Align.CENTER);

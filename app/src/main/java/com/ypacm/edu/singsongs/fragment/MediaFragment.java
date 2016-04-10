@@ -73,8 +73,10 @@ public class MediaFragment extends Fragment {
                 pos = i;
             }
         }
+//        file:///E:/adt-bundle-windows-x86-20131030/sdk/docs/reference/android/media/audiofx/Visualizer.html
+//        频率计算有误
         int position = (pos / 2 * (samplingRate / 1000)) / (values.length - 1);
-        drawPoint[drawCount] = (int) (height / 2 - (position));
+        drawPoint[drawCount] = (height / 2 - (position));
         for (int i = 0; i < len; i++) {
             canvas.drawLine((len - i - 1) * width / len, drawPoint[(drawCount - i + len) % len], (len - i) * width / len, drawPoint[(drawCount - i + len) % len], paint);
         }

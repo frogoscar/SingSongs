@@ -42,6 +42,7 @@ public class RadioFragment extends Fragment {
 
     private int width = 1080;
     private int height = 1920;
+
     AnimationRunnable runnable = new AnimationRunnable();
     private int pacmanCount = 0;
     private int pacmanId[] = {R.drawable.pacman_right3, R.drawable.pacman_right2, R.drawable.pacman_right1, R.drawable.pacman_right0,};
@@ -53,8 +54,10 @@ public class RadioFragment extends Fragment {
 
 
         pacMan = (ImageView) mView.findViewById(R.id.iv_pacman);
-        pacMan.setX(width / 8);
+        pacMan.setX(30);
         pacMan.setY(height / 4);
+        pacMan.setScaleX(2.0f);
+        pacMan.setScaleY(2.0f);
         pacMan.setImageResource(R.drawable.pacman_right3);
         handler.postDelayed(runnable, 200);
         fftTrans = new RealDoubleFFT(BLOCK_SIZE);
@@ -115,10 +118,11 @@ public class RadioFragment extends Fragment {
                 }
             }
             Log.d("maxn", "" + maxn * 4);
-            int p = (height / 2 - (maxn * 2));
+            if (maxn <= 20)
+                maxn = 20;
+            int p = (height / 2 - (maxn * 4));
             pacMan.setY(p);
             Log.d("pacman", "" + p);
-            pacMan.invalidate();
         }
     }
 

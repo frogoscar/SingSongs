@@ -22,7 +22,6 @@ import com.ypacm.edu.singsongs.fragment.LyricFragment;
 import com.ypacm.edu.singsongs.fragment.MediaFragment;
 import com.ypacm.edu.singsongs.fragment.RadioFragment;
 
-import java.io.IOException;
 
 
 public class MainActivity extends AppCompatActivity
@@ -62,8 +61,8 @@ public class MainActivity extends AppCompatActivity
         beginTransaction.commit();
 
 
-        mMediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.standard_tone);
-//        mMediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.libai2);
+//        mMediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.standard_tone);
+        mMediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.libai2);
         mMediaPlayer.setLooping(true);
         final int maxCR = Visualizer.getMaxCaptureRate();
         mVisualizer = new Visualizer(mMediaPlayer.getAudioSessionId());
