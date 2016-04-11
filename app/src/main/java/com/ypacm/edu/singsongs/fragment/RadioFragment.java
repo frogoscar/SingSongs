@@ -1,5 +1,6 @@
 package com.ypacm.edu.singsongs.fragment;
 
+import android.animation.ObjectAnimator;
 import android.app.Fragment;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -13,12 +14,17 @@ import android.media.MediaRecorder;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
+import com.ypacm.edu.singsongs.MainActivity;
 import com.ypacm.edu.singsongs.R;
 import com.ypacm.edu.singsongs.fftpack.RealDoubleFFT;
 
@@ -40,24 +46,32 @@ public class RadioFragment extends Fragment {
     private boolean startFlag = true;
     private RealDoubleFFT fftTrans;
 
-    private int width = 1080;
-    private int height = 1920;
+    private float width;
+    private float height;
 
     AnimationRunnable runnable = new AnimationRunnable();
     private int pacmanCount = 0;
     private int pacmanId[] = {R.drawable.pacman_right3, R.drawable.pacman_right2, R.drawable.pacman_right1, R.drawable.pacman_right0,};
 
+    private float density;
+
     @Override
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View mView = inflater.inflate(R.layout.pacman_fragment, container, false);
+        final View mView = inflater.inflate(R.layout.pacman_fragment, container, false);
 
-
+        width = mView.getMeasuredWidth();
+        height = mView.getMeasuredHeight();
+        DisplayMetrics dm = getResources().getDisplayMetrics();
+        int widthPixels = dm.widthPixels;
+        int heightPixels = dm.heightPixels;
+        density = dm.density;
+        width = widthPixels / density;
+        height = heightPixels / density;
         pacMan = (ImageView) mView.findViewById(R.id.iv_pacman);
-        pacMan.setX(30);
-        pacMan.setY(height / 4);
-        pacMan.setScaleX(2.0f);
-        pacMan.setScaleY(2.0f);
+        pacMan.setX(width / 4);
+        pacMan.setY(height / 2);
+
         pacMan.setImageResource(R.drawable.pacman_right3);
         handler.postDelayed(runnable, 200);
         fftTrans = new RealDoubleFFT(BLOCK_SIZE);
@@ -111,17 +125,21 @@ public class RadioFragment extends Fragment {
         @Override
         protected void onProgressUpdate(double[]... values) {
 //            canvas.drawColor(Color.BLACK);
-            int maxn = 0;
+            int pos = 0;
+            double maxn = 0;
             for (int i = 0; i < values[0].length; i++) {
                 if (values[0][i] > maxn) {
-                    maxn = i;
+                    pos = i;
+                    maxn = values[0][i];
                 }
             }
-            Log.d("maxn", "" + maxn * 4);
-            if (maxn <= 20)
-                maxn = 20;
-            int p = (height / 2 - (maxn * 4));
-            pacMan.setY(p);
+            Log.d("maxn", "" + maxn);
+            Log.d("pos", "" + pos);
+
+//            ObjectAnimator.ofFloat(pacMan,"translationX",);
+            float p = (height - (pos));
+//            pacMan.setY(p);
+            ObjectAnimator.ofFloat(pacMan, "translationY", p).start();
             Log.d("pacman", "" + p);
         }
     }

@@ -27,6 +27,7 @@ public class LyricView extends TextView implements Runnable {
 
     private static final int DY = 80;
 
+    private int SIZE = 40;
     private Paint mCurrentPaint;
     private Paint mPaint;
     private float mMiddleX;
@@ -62,7 +63,7 @@ public class LyricView extends TextView implements Runnable {
         // Non-highlight part
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
-        mPaint.setTextSize(34);
+        mPaint.setTextSize(SIZE - 6);
         mPaint.setColor(normalColor);
         mPaint.setAlpha(70);
         mPaint.setTypeface(Typeface.SERIF);
@@ -71,13 +72,17 @@ public class LyricView extends TextView implements Runnable {
         mCurrentPaint = new Paint();
         mCurrentPaint.setAntiAlias(true);
         mCurrentPaint.setColor(highlightColor);
-        mCurrentPaint.setTextSize(44);
+        mCurrentPaint.setTextSize(SIZE);
         mCurrentPaint.setTypeface(Typeface.SANS_SERIF);
 
         mPaint.setTextAlign(Paint.Align.CENTER);
         mCurrentPaint.setTextAlign(Paint.Align.CENTER);
         setHorizontallyScrolling(true);
         setMovementMethod(new ScrollingMovementMethod());
+    }
+
+    public void setTextSize(int size) {
+        SIZE = size;
     }
 
     public void setOnLyricUpdateListener(OnLyricUpdateListener lister) {

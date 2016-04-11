@@ -44,7 +44,7 @@ public class MediaFragment extends Fragment {
 //        imageView.setImageResource(R.drawable.ic_menu_camera);
         bitmap = Bitmap.createBitmap(width, height / 2, Bitmap.Config.ARGB_8888);
         canvas = new Canvas(bitmap);
-        paint = new Paint();
+        paint = new Paint();;
         paint.setColor(Color.GREEN);
         imageView.setImageBitmap(bitmap);
 
