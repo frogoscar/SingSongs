@@ -33,9 +33,13 @@ import com.ypacm.edu.singsongs.fftpack.RealDoubleFFT;
  */
 public class RadioFragment extends Fragment {
 
+
+    private static final String TAG = "RadioFragment";
     private Handler handler = new Handler();
     private ImageView pacMan;
 
+    static final int frequencyMax = 900;
+    static final int frequencyMin = 100;
     static final int frequency = 8000;
     static final int channelConfig = AudioFormat.CHANNEL_IN_MONO;
     static final int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
@@ -66,12 +70,17 @@ public class RadioFragment extends Fragment {
         int widthPixels = dm.widthPixels;
         int heightPixels = dm.heightPixels;
         density = dm.density;
-        width = widthPixels / density;
-        height = heightPixels / density;
+        width = widthPixels;
+        height = heightPixels;
         pacMan = (ImageView) mView.findViewById(R.id.iv_pacman);
+
+        pacMan.setScaleX(2.0f);
+        pacMan.setScaleY(2.0f);
         pacMan.setX(width / 4);
         pacMan.setY(height / 2);
 
+        pacMan.setScaleX(2);
+        pacMan.setScaleY(2);
         pacMan.setImageResource(R.drawable.pacman_right3);
         handler.postDelayed(runnable, 200);
         fftTrans = new RealDoubleFFT(BLOCK_SIZE);
@@ -117,7 +126,7 @@ public class RadioFragment extends Fragment {
                 }
                 audioRecord.stop();
             } catch (Throwable t) {
-                Log.e("AudioRecord", "Recording failed");
+                Log.e(TAG, "Recording failed");
             }
             return null;
         }
@@ -133,14 +142,22 @@ public class RadioFragment extends Fragment {
                     maxn = values[0][i];
                 }
             }
-            Log.d("maxn", "" + maxn);
-            Log.d("pos", "" + pos);
+            Log.d(TAG, "maxn:" + maxn);
+            Log.d(TAG, "pos" + pos);
 
-//            ObjectAnimator.ofFloat(pacMan,"translationX",);
-            float p = (height - (pos));
-//            pacMan.setY(p);
-            ObjectAnimator.ofFloat(pacMan, "translationY", p).start();
-            Log.d("pacman", "" + p);
+            float p = (height / 2 - (pos * 4) * height / 2000);
+            if (maxn > 5) {
+                if (p > frequencyMax)
+                    pos = frequencyMax;
+                if (pos < frequencyMin)
+                    pos = frequencyMin;
+
+                ObjectAnimator.ofFloat(pacMan, "translationY", p).start();
+                ObjectAnimator.ofFloat(pacMan, "alpha", 1f).start();
+                Log.d("pacman", "" + p);
+            } else {
+                ObjectAnimator.ofFloat(pacMan, "alpha", 0f).start();
+            }
         }
     }
 

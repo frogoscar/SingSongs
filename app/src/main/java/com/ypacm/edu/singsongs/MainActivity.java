@@ -13,6 +13,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.view.Menu;
@@ -84,10 +85,10 @@ public class MainActivity extends AppCompatActivity
     class MediaThread extends Thread {
         @Override
         public void run() {
-            //        mMediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.standard_tone);
-//            mMediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.lovesong2);
+//                    mMediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.standard_tone);
+            mMediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.lovesong2);
 
-//        mMediaPlayer.setLooping(true);
+        mMediaPlayer.setLooping(true);
             final int maxCR = Visualizer.getMaxCaptureRate();
             mVisualizer = new Visualizer(mMediaPlayer.getAudioSessionId());
 //        mVisualizer.setCaptureSize(BLOCK_SIZE);

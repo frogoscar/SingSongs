@@ -24,16 +24,20 @@ import com.ypacm.edu.singsongs.R;
  */
 public class MediaFragment extends Fragment {
 
+    private static final String TAG = "MediaFragment";
     public Bitmap bitmap;
     public Canvas canvas;
     private Paint paint;
     private Point point;
 
+    static final int frequencyMax = 900;
+    static final int frequencyMin = 100;
+
     private int width = 1080;
     private int height = 1920;
 
     private int drawCount = 0;
-    private int len = 50;
+    private int len = 30;
     private int drawPoint[] = new int[len];
     private ImageView imageView;
 
@@ -44,7 +48,8 @@ public class MediaFragment extends Fragment {
 //        imageView.setImageResource(R.drawable.ic_menu_camera);
         bitmap = Bitmap.createBitmap(width, height / 2, Bitmap.Config.ARGB_8888);
         canvas = new Canvas(bitmap);
-        paint = new Paint();;
+        paint = new Paint();
+        paint.setStrokeWidth(3f);
         paint.setColor(Color.GREEN);
         imageView.setImageBitmap(bitmap);
 
@@ -73,15 +78,28 @@ public class MediaFragment extends Fragment {
                 pos = i;
             }
         }
+        Log.d(TAG, "maxn" + maxn);
 //        file:///E:/adt-bundle-windows-x86-20131030/sdk/docs/reference/android/media/audiofx/Visualizer.html
 //        频率计算有误
         int position = (pos / 2 * (samplingRate / 1000)) / (values.length - 1);
-        drawPoint[drawCount] = (height / 2 - (position));
+        if (maxn < 60)
+            position = frequencyMax;
+        if (position > frequencyMax)
+            position = frequencyMax;
+        if (position < frequencyMin)
+            position = frequencyMin;
+        drawPoint[drawCount] = (height / 2 - (position) * height / 2000);
+        if (Math.abs(drawPoint[drawCount] - drawPoint[(drawCount - 1 + len) % len]) < 40) {
+            drawPoint[drawCount] = drawPoint[(drawCount - 1 + len) % len];
+        }
         for (int i = 0; i < len; i++) {
-            canvas.drawLine((len - i - 1) * width / len, drawPoint[(drawCount - i + len) % len], (len - i) * width / len, drawPoint[(drawCount - i + len) % len], paint);
+            int value = drawPoint[(drawCount - i + len) % len];
+            if (value == (height / 2 - (frequencyMax) * height / 2000) || value == (height / 2 - (frequencyMin) * height / 2000))
+                continue;
+            canvas.drawLine((len - i - 1) * width / len, value, (len - i) * width / len, value, paint);
         }
         drawCount = (drawCount + 1) % len;
-        Log.d("Hz", "pos: " + pos + "positon:" + position);
+        Log.d(TAG, "pos: " + pos + " positon:" + position);
         imageView.invalidate();
     }
 }
