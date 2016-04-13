@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.media.audiofx.Visualizer;
@@ -18,6 +19,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.ypacm.edu.singsongs.fragment.LyricFragment;
@@ -35,12 +37,9 @@ public class MainActivity extends AppCompatActivity
     private MediaPlayer mMediaPlayer;
     private Visualizer mVisualizer;
     public Context mContext;
-    private float density;
-    private float displayWidth;
-    private float displayHeigth;
-    static final int BLOCK_SIZE = 1 << 6;
 
-
+    private int width;
+    private int height;
     private MediaFragment mediaFragment;
     private RadioFragment radioFragment;
     private LyricFragment lyricFragment;
@@ -48,15 +47,26 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        DisplayMetrics dm = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(dm);
-        int widthPixels = dm.widthPixels;
-        int heightPixels = dm.heightPixels;
-        density = dm.density;
-        displayWidth = widthPixels / density;
-        displayHeigth = heightPixels / density;
+
         mContext = this;
         setContentView(R.layout.activity_main);
+
+        SharedPreferences pref = getSharedPreferences("screen_size", MODE_PRIVATE);
+        width = pref.getInt("width",0);
+        height = pref.getInt("height",0);
+        if(width==0&&height==0)
+        {
+            WindowManager wm = this.getWindowManager();
+
+            DisplayMetrics dm = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(dm);
+            width = dm.widthPixels;
+            height = dm.heightPixels;
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putInt("width", width);
+            editor.putInt("height", height);
+            editor.commit();
+        }
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 

@@ -2,6 +2,7 @@ package com.ypacm.edu.singsongs.fragment;
 
 import android.app.Fragment;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -40,6 +41,7 @@ public class MediaFragment extends Fragment {
     private int len = 30;
     private int drawPoint[] = new int[len];
     private ImageView imageView;
+    private Bitmap fishBitmap;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -52,7 +54,7 @@ public class MediaFragment extends Fragment {
         paint.setStrokeWidth(3f);
         paint.setColor(Color.GREEN);
         imageView.setImageBitmap(bitmap);
-
+//        fishBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.y11_1);
         return mView;
     }
 
@@ -92,11 +94,13 @@ public class MediaFragment extends Fragment {
         if (Math.abs(drawPoint[drawCount] - drawPoint[(drawCount - 1 + len) % len]) < 40) {
             drawPoint[drawCount] = drawPoint[(drawCount - 1 + len) % len];
         }
+
         for (int i = 0; i < len; i++) {
             int value = drawPoint[(drawCount - i + len) % len];
             if (value == (height / 2 - (frequencyMax) * height / 2000) || value == (height / 2 - (frequencyMin) * height / 2000))
                 continue;
             canvas.drawLine((len - i - 1) * width / len, value, (len - i) * width / len, value, paint);
+//            canvas.drawBitmap(fishBitmap, (len - i - 1) * width / len, value, paint);
         }
         drawCount = (drawCount + 1) % len;
         Log.d(TAG, "pos: " + pos + " positon:" + position);
