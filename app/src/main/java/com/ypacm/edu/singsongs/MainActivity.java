@@ -1,12 +1,11 @@
 package com.ypacm.edu.singsongs;
 
-import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
-import android.media.MediaRecorder;
 import android.media.audiofx.Visualizer;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -25,9 +24,6 @@ import android.widget.Toast;
 import com.ypacm.edu.singsongs.fragment.LyricFragment;
 import com.ypacm.edu.singsongs.fragment.MediaFragment;
 import com.ypacm.edu.singsongs.fragment.RadioFragment;
-
-import java.io.IOException;
-import java.util.logging.Handler;
 
 
 public class MainActivity extends AppCompatActivity
@@ -51,22 +47,6 @@ public class MainActivity extends AppCompatActivity
         mContext = this;
         setContentView(R.layout.activity_main);
 
-        SharedPreferences pref = getSharedPreferences("screen_size", MODE_PRIVATE);
-        width = pref.getInt("width",0);
-        height = pref.getInt("height",0);
-        if(width==0&&height==0)
-        {
-            WindowManager wm = this.getWindowManager();
-
-            DisplayMetrics dm = new DisplayMetrics();
-            getWindowManager().getDefaultDisplay().getMetrics(dm);
-            width = dm.widthPixels;
-            height = dm.heightPixels;
-            SharedPreferences.Editor editor = pref.edit();
-            editor.putInt("width", width);
-            editor.putInt("height", height);
-            editor.commit();
-        }
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -89,7 +69,6 @@ public class MainActivity extends AppCompatActivity
         beginTransaction.add(R.id.ll_lyric, lyricFragment, "lyricFragment");
         beginTransaction.commit();
 
-
     }
 
     class MediaThread extends Thread {
@@ -98,7 +77,7 @@ public class MainActivity extends AppCompatActivity
 //                    mMediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.standard_tone);
             mMediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.lovesong2);
 
-        mMediaPlayer.setLooping(true);
+            mMediaPlayer.setLooping(true);
             final int maxCR = Visualizer.getMaxCaptureRate();
             mVisualizer = new Visualizer(mMediaPlayer.getAudioSessionId());
 //        mVisualizer.setCaptureSize(BLOCK_SIZE);
@@ -134,21 +113,29 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStop() {
         super.onStop();
-        if (mMediaPlayer.isPlaying())
-            mMediaPlayer.pause();
+        if (mMediaPlayer != null)
+            if (mMediaPlayer.isPlaying())
+                mMediaPlayer.pause();
+        if (lyricFragment != null)
+            lyricFragment.setEnabled(false);
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
-        mMediaPlayer.start();
+        if (mMediaPlayer != null)
+            mMediaPlayer.start();
+        if (lyricFragment != null)
+            lyricFragment.setEnabled(true);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mMediaPlayer.release();
-        mMediaPlayer = null;
+        if (mMediaPlayer != null) {
+            mMediaPlayer.release();
+            mMediaPlayer = null;
+        }
     }
 
     @Override
@@ -194,6 +181,8 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_camera) {
             // Handle the camera action
+            Intent i = new Intent(this, LoadActivity.class);
+            startActivityForResult(i, 1);
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
@@ -203,12 +192,18 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_share) {
 
         } else if (id == R.id.nav_send) {
-
             finish();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == RESULT_OK) {
+            Toast.makeText(this, "加载完成。。。", Toast.LENGTH_LONG).show();
+        }
     }
 }

@@ -2,31 +2,25 @@ package com.ypacm.edu.singsongs.fragment;
 
 import android.animation.ObjectAnimator;
 import android.app.Fragment;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Point;
-import android.graphics.drawable.AnimationDrawable;
+import android.content.SharedPreferences;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
-import com.ypacm.edu.singsongs.MainActivity;
 import com.ypacm.edu.singsongs.R;
 import com.ypacm.edu.singsongs.fftpack.RealDoubleFFT;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Created by DB on 2016/4/6.
@@ -38,9 +32,10 @@ public class RadioFragment extends Fragment {
     private Handler handler = new Handler();
     private ImageView pacMan;
 
+
     static final int frequencyMax = 900;
     static final int frequencyMin = 100;
-    static final int frequency = 8000;
+    static final int frequency = 11025;
     static final int channelConfig = AudioFormat.CHANNEL_IN_MONO;
     static final int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
     static final int BLOCK_SIZE = 1 << 10;
@@ -57,30 +52,20 @@ public class RadioFragment extends Fragment {
     private int pacmanCount = 0;
     private int pacmanId[] = {R.drawable.pacman_right3, R.drawable.pacman_right2, R.drawable.pacman_right1, R.drawable.pacman_right0,};
 
-    private float density;
-
     @Override
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View mView = inflater.inflate(R.layout.pacman_fragment, container, false);
 
-        width = mView.getMeasuredWidth();
-        height = mView.getMeasuredHeight();
-        DisplayMetrics dm = getResources().getDisplayMetrics();
-        int widthPixels = dm.widthPixels;
-        int heightPixels = dm.heightPixels;
-        density = dm.density;
-        width = widthPixels;
-        height = heightPixels;
+        SharedPreferences pref = getActivity().getSharedPreferences("configure", getActivity().MODE_PRIVATE);
+        width = pref.getInt("width", 0);
+        height = pref.getInt("height", 0);
         pacMan = (ImageView) mView.findViewById(R.id.iv_pacman);
 
+        pacMan.setX(width / 4);
         pacMan.setScaleX(2.0f);
         pacMan.setScaleY(2.0f);
-        pacMan.setX(width / 4);
-        pacMan.setY(height / 2);
 
-        pacMan.setScaleX(2);
-        pacMan.setScaleY(2);
         pacMan.setImageResource(R.drawable.pacman_right3);
         handler.postDelayed(runnable, 200);
         fftTrans = new RealDoubleFFT(BLOCK_SIZE);
@@ -95,13 +80,23 @@ public class RadioFragment extends Fragment {
             try {
                 int bufferSize = AudioRecord.getMinBufferSize(frequency,
                         channelConfig, audioFormat);
-                Log.v("bufSize", String.valueOf(bufferSize));
                 //录音 MediaRecorder.AudioSource.MIC
                 //只录音去掉播放的音乐 MediaRecorder.AudioSource.VOICE_COMMUNICATION
                 AudioRecord audioRecord = new AudioRecord(
                         MediaRecorder.AudioSource.VOICE_COMMUNICATION, frequency,
                         channelConfig, audioFormat, bufferSize);
 
+//                File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/reverseme.pcm");
+//
+//                // Delete any previous recording.
+//
+//                if (file.exists())
+//                    file.delete();
+//                try {
+//                    file.createNewFile();
+//                } catch (IOException e) {
+//                    throw new IllegalStateException("Failed to create " + file.toString());
+//                }
                 short[] audioBuffer = new short[BLOCK_SIZE];
                 double[] toTrans = new double[BLOCK_SIZE];
 
@@ -135,22 +130,22 @@ public class RadioFragment extends Fragment {
         protected void onProgressUpdate(double[]... values) {
 //            canvas.drawColor(Color.BLACK);
             int pos = 0;
-            double maxn = 0;
-            for (int i = 0; i < values[0].length; i++) {
-                if (values[0][i] > maxn) {
+            double maxn = Math.abs(values[0][0]);//基频，直流分量
+            for (int i = 2; i <  values[0].length; i += 2) {
+                double temp = Math.hypot(values[0][i], values[0][i + 1]);
+                if (temp > maxn) {
+                    maxn = temp;
                     pos = i;
-                    maxn = values[0][i];
                 }
             }
             Log.d(TAG, "maxn:" + maxn);
-            Log.d(TAG, "pos" + pos);
-
-            float p = (height / 2 - (pos * 4) * height / 2000);
-            if (maxn > 5) {
+            float p = height / 2 - (pos / 2 * frequency) / (values[0].length - 1);
+            Log.d(TAG, "" + (pos / 2 * frequency) / (values[0].length - 1)+"hz");
+            if (maxn > 1) {
                 if (p > frequencyMax)
-                    pos = frequencyMax;
-                if (pos < frequencyMin)
-                    pos = frequencyMin;
+                    p = frequencyMax;
+                if (p < frequencyMin)
+                    p = frequencyMin;
 
                 ObjectAnimator.ofFloat(pacMan, "translationY", p).start();
                 ObjectAnimator.ofFloat(pacMan, "alpha", 1f).start();
@@ -169,4 +164,9 @@ public class RadioFragment extends Fragment {
             handler.postDelayed(runnable, 200);
         }
     }
+
+    public void setEnabled(boolean statu) {
+        startFlag = statu;
+    }
+
 }

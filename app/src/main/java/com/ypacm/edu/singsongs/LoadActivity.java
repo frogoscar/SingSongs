@@ -45,12 +45,14 @@ public class LoadActivity extends AppCompatActivity  implements OnProgressBarLis
     private Handler handler = new Handler();
     AnimationRunnable runnable = new AnimationRunnable();
 
+
+    private Intent i;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_load);
-
-        SharedPreferences pref = getSharedPreferences("screen_size", MODE_PRIVATE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        SharedPreferences pref = getSharedPreferences("configure", MODE_PRIVATE);
         width = pref.getInt("width",0);
         height = pref.getInt("height",0);
         heicat = (ImageView) findViewById(R.id.iv_heicat);
@@ -76,6 +78,7 @@ public class LoadActivity extends AppCompatActivity  implements OnProgressBarLis
         heicatBitmap = new Bitmap[heicatId.length];
 
         handler.postDelayed(runnable, 200);
+
     }
 
     @Override
@@ -89,9 +92,12 @@ public class LoadActivity extends AppCompatActivity  implements OnProgressBarLis
 
         heicat.setX(current * width / 100 - heicat.getWidth() - 16);
         if (current == max) {
-            Toast.makeText(getApplicationContext(), getString(R.string.finish), Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(this,MainActivity.class));
-            onDestroy();
+//            Toast.makeText(getApplicationContext(), getString(R.string.finish), Toast.LENGTH_SHORT).show();
+            i = new Intent();
+            setResult(RESULT_OK, i);
+            LoadActivity.this.finish();
+//            startActivity(new Intent(this,MainActivity.class));
+//            onDestroy();
         }
     }
 

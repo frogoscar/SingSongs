@@ -1,6 +1,7 @@
 package com.ypacm.edu.singsongs.fragment;
 
 import android.app.Fragment;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -34,8 +35,8 @@ public class MediaFragment extends Fragment {
     static final int frequencyMax = 900;
     static final int frequencyMin = 100;
 
-    private int width = 1080;
-    private int height = 1920;
+    private int width;
+    private int height;
 
     private int drawCount = 0;
     private int len = 30;
@@ -46,6 +47,9 @@ public class MediaFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View mView = inflater.inflate(R.layout.game_backgroud, container, false);
+        SharedPreferences pref = getActivity().getSharedPreferences("configure", getActivity().MODE_PRIVATE);
+        width = pref.getInt("width", 0);
+        height = pref.getInt("height", 0);
         imageView = (ImageView) mView.findViewById(R.id.iv_backgroud);
 //        imageView.setImageResource(R.drawable.ic_menu_camera);
         bitmap = Bitmap.createBitmap(width, height / 2, Bitmap.Config.ARGB_8888);
@@ -80,7 +84,7 @@ public class MediaFragment extends Fragment {
                 pos = i;
             }
         }
-        Log.d(TAG, "maxn" + maxn);
+//        Log.d(TAG, "maxn" + maxn);
 //        file:///E:/adt-bundle-windows-x86-20131030/sdk/docs/reference/android/media/audiofx/Visualizer.html
 //        频率计算有误
         int position = (pos / 2 * (samplingRate / 1000)) / (values.length - 1);
@@ -103,7 +107,7 @@ public class MediaFragment extends Fragment {
 //            canvas.drawBitmap(fishBitmap, (len - i - 1) * width / len, value, paint);
         }
         drawCount = (drawCount + 1) % len;
-        Log.d(TAG, "pos: " + pos + " positon:" + position);
+//        Log.d(TAG, "pos: " + pos + " positon:" + position);
         imageView.invalidate();
     }
 }
